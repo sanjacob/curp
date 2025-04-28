@@ -27,28 +27,28 @@ static struct trie_node *entidades_trie,
 
 
 /* para reconocer vocales*/
-static int vowels[26] = {
+static const unsigned int vowels[26] = {
 /*  a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, ... */
 	1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1
 };
 
 /* sexos validos de la CURP */
-static int sexos[26] = {
+static const unsigned int sexos[26] = {
 /*  a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x */
 	0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
 };
 
 /* cuales caracteres en la CURP deben ser letras */
-static int uppers[] = {
+static const unsigned int uppers[] = {
 	1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0
 };
 
-static int digits[] = {
+static const unsigned int digits[] = {
 	0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0
 };
 
 /* para calcular digito verificador */
-static int factor[] = {
+static const unsigned int factor[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* digitos */
     0, 0, 0, 0, 0, 0, 0, /* simbolos */
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 5, 6, 7, 8, 9,
@@ -56,7 +56,7 @@ static int factor[] = {
 };
 
 /* dias en cada mes */
-static const int days_in_month[] = {
+static const unsigned int days_in_month[] = {
     0, /* unused; this vector uses 1-based indexing */
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };	
@@ -116,6 +116,8 @@ int curp_cargar(const char *s, struct curp* p)
 	unsigned int i;
 
 	node = entidades_trie;
+	p->sexo = 0;
+	p->entidad_nacimiento = 0;
 	p->anio_nacimiento = 0;
 	p->mes_nacimiento = 0;
 	p->dia_nacimiento = 0;
@@ -132,7 +134,7 @@ int curp_cargar(const char *s, struct curp* p)
 			p->dia_nacimiento = (10 * p->dia_nacimiento) + (*c - '0');
 			break;
 		case 10:
-			p->sexo = (*c == 'H' ? 1 : (*c == 'M' ? 2 : 0));
+			p->sexo = (*c == 'H' ? HOMBRE : (*c == 'M' ? MUJER : 0));
 			break;
 		case 11: case 12:
 			if (node != NULL) node = TRIE_GET(node, *c);
@@ -148,7 +150,6 @@ int curp_cargar(const char *s, struct curp* p)
 	if (node != NULL) p->entidad_nacimiento = node->value;
 	return i == 18 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
 
 int curp_validar(const char *s, struct curp* p)
 {
@@ -195,14 +196,14 @@ int curp_validar(const char *s, struct curp* p)
 		sum += (18 - i) * factor[*c - '0'];
 	}
 
-	if (i != 18) return -(ok << 7 | i);
+	if (i != 18 || !ok) return -(ok << 7 | i);
 
 	/* revisar dia del mes, anio bisiesto */
 	is_leap = (year % 4 == 0) && (year || h);
 	dim = month == 2 && is_leap ? 29 : days_in_month[month];
 	if (day < 1 || day > dim) return ERROR_FECHA;
 
-	if (sum % 10 != 0) return ERROR_VERIFICADOR;
+	if (sum % 10 != 0) return -(ok << 7 | i);
 
 	/* guardar detalles de la curp */
 	if (p != NULL) {
@@ -210,7 +211,7 @@ int curp_validar(const char *s, struct curp* p)
 		p->mes_nacimiento = month;
 		p->dia_nacimiento = day;
 		p->entidad_nacimiento = node->value;
-		p->sexo = sexo == 'H' ? 1 : (sexo == 'M' ? 2 : 0);
+		p->sexo = sexo == 'H' ? HOMBRE : (sexo == 'M' ? MUJER : 0);
 	}
 
 	return CURP_VALIDA;
@@ -224,13 +225,13 @@ enum curp_err curp_error(int code) {
 	pos = -code & 0x1F;
 	ok = -code >> 7;
 
-	if (ok) return ERROR_FORMATO;
+	if (ok) return pos == 18 ? ERROR_VERIFICADOR : ERROR_FORMATO;
 
 	switch(pos) {
 	case 8: return ERROR_FECHA;
 	case 12: return ERROR_ENTIDAD;
 	case 14: case 15: return ERROR_CONSONANTE;
-	case 16: return ERROR_FORMATO;
+	case 16: case 18: return ERROR_FORMATO;
 	default: return -pos;
 	}
 }
@@ -247,4 +248,99 @@ const char *curp_entidad_nombre(unsigned int entidad)
 	return entidades_nombre[entidad];
 }
 
+static struct name_features find_char_vowel_consonant(const char *s)
+{
+	const char *c;
+    char letter, vowel, consonant;
+	struct name_features n;
 
+    static unsigned int vowels[26] = {
+        1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+        0, 0, 0, 1, 0, 0, 0, 0, 0, 1
+    };
+
+    /* Find first char, vowel, and consonant */
+    n.initial = *s;
+    n.vowel = '\0';
+    n.consonant = '\0';
+
+    for (c = s, ++c; *c != '\0'; ++c) {
+        if (isupper(*c)) {
+            unsigned int is_vowel = vowels[*c - 'A'];
+
+            if (!n.vowel && is_vowel) {
+                /* found vowel */
+                n.vowel = *c;
+                if (n.consonant) break;
+            } else if (!n.consonant && !is_vowel) {
+                /* found consonant */
+                n.consonant = *c;
+                if (n.vowel) break;
+            }
+        } else if (isspace(*c)) break;
+    }
+
+	return n;
+}
+
+void curp_crear(char *curp, struct curp p, const char *nombre,
+	const char *primer_apellido, const char *segundo_apellido)
+{
+	struct trie_node *node;
+	struct name_features *n, nombres[] = {
+		'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'
+	};
+
+	int *d, date[3] = { 2000, 1, 1 };
+
+	unsigned int anio, sexo, i, sum;
+	const char *entidad;
+	char c;
+
+	node = altisonantes_trie;
+	n = nombres;
+	d = date;
+	anio = sexo = 0;
+	entidad = entidades[0];
+
+	if (primer_apellido != NULL)
+		nombres[0] = find_char_vowel_consonant(primer_apellido);
+	if (segundo_apellido != NULL)
+		nombres[1] = find_char_vowel_consonant(segundo_apellido);
+	if (nombre != NULL)
+		nombres[2] = find_char_vowel_consonant(nombre);
+
+	if (p.anio_nacimiento >= 1) anio = p.anio_nacimiento;
+	if (p.mes_nacimiento > 0 && p.mes_nacimiento <= 12) date[1] = p.mes_nacimiento;
+	if (p.dia_nacimiento > 0 && p.dia_nacimiento <= 31) date[2] = p.dia_nacimiento;
+
+	date[0] = p.anio_nacimiento % 100;
+
+	if (p.sexo >= 0 && p.sexo <= 2) sexo = p.sexo;
+	if (p.entidad_nacimiento >= 0 && p.entidad_nacimiento <= 32)
+		entidad = entidades[p.entidad_nacimiento];
+
+	for (i = sum = 0; curp[i] != '\0' && i < CURP_LENGTH; ++i) {
+		switch (i) {
+			case 1: c = nombres->vowel;
+				if (node != NULL) node = TRIE_GET(node, c); break;
+			case 0: case 2: case 3: c = n++->initial;
+				if (node != NULL) node = TRIE_GET(node, c); break;
+			case 4: case 6: case 8: c = '0' + (*d / 10); break;
+			case 5: case 7: case 9: c = '0' + (*d++ % 10); break;
+			case 10: c = sexo_chars[sexo]; break;
+			case 11: case 12: c = *entidad++; break;
+			case 13: n = nombres;
+			case 14: case 15: c = n++->consonant; break;
+			case 16: c = anio >= 2000 ? 'A' : '1'; break;
+			case 17: c = '0' + ((10 - (sum % 10)) % 10); break;
+			default: c = 'X'; break;
+		}
+
+		curp[i] = c;
+		sum += (CURP_LENGTH - i) * factor[c - '0'];
+	}
+
+	/* censurar palabra altisonante */
+	if (node != NULL) curp[1] = 'X';
+}

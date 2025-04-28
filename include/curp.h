@@ -1,6 +1,8 @@
 #ifndef CURP_H
 #define CURP_H
 
+#define CURP_LENGTH 18
+
 static const char *const entidades[] = {
 	"AS", "BC", "BS", "CC", "CL", "CM", "CS", "CH", "DF", "DG", "GT",
 	"GR", "HG", "JC", "MC", "MN", "MS", "NT", "NL", "OC", "PL", "QT",
@@ -51,6 +53,63 @@ static const char *const preposiciones[] = {
 	}
 */
 
+static const char const sexo_chars[] = {'X', 'H', 'M'};
+
+enum curp_sexo {
+	HOMBRE = 1,
+	MUJER = 2
+};
+
+enum curp_entidad {
+	AGUASCALIENTES,
+	BAJA_CALIFORNIA,
+	BAJA_CALIFORNIA_SUR,
+	CAMPECHE,
+	COAHUILA,
+	COLIMA,
+	CHIAPAS,
+	CHIHUAHUA,
+	CIUDAD_DE_MEXICO,
+	DURANGO,
+	GUANAJUATO,
+	GUERRERO,
+	HIDALGO,
+	JALISCO,
+	MEXICO,
+	MICHOACAN,
+	MORELOS,
+	NAYARIT,
+	NUEVO_LEON,
+	OAXACA,
+	PUEBLA,
+	QUERETARO,
+	QUINTANA_ROO,
+	SAN_LUIS_POTOSI,
+	SINALOA,
+	SONORA,
+	TABASCO,
+	TAMAULIPAS,
+	TLAXCALA,
+	VERACRUZ,
+	YUCATAN,
+	ZACATECAS,
+	EXTRANJERO,
+};
+
+struct curp {
+	unsigned int dia_nacimiento;
+	unsigned int mes_nacimiento;
+	unsigned int anio_nacimiento;
+	enum curp_sexo sexo;
+	enum curp_entidad entidad_nacimiento;
+};
+
+struct name_features {
+	char initial;
+	char vowel;
+	char consonant;
+};
+
 enum curp_err {
 	CURP_VALIDA = 1,
 	ERROR_VOCAL = -1,
@@ -61,14 +120,6 @@ enum curp_err {
 	ERROR_CONSONANTE = -13,
 	ERROR_VERIFICADOR = -18,
 	ERROR_FORMATO = -20,
-};
-
-struct curp {
-	unsigned int sexo;
-	unsigned int dia_nacimiento;
-	unsigned int mes_nacimiento;
-	unsigned int anio_nacimiento;
-	unsigned int entidad_nacimiento;
 };
 
 #define CURP_ERROR_POSICION(code) (-code & 0x1F)
@@ -90,6 +141,9 @@ const char *curp_entidad_iso(unsigned int entidad);
 
 /* obtener nombre de entidad */
 const char *curp_entidad_nombre(unsigned int entidad);
+
+void curp_crear(char *curp, struct curp p, const char *nombre,
+		const char *primer_apellido, const char *segundo_apellido);
 
 /* obtiene el codigo de error */
 enum curp_err curp_error(int code);

@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     /* Valida y extrae propiedades de una CURP */
     if (curp_validar("SABC560626MDFLRN09", &p) == CURP_VALIDA) {
         /* sexo (1: hombre, 2: mujer, 0: x) */
-        printf("sexo: %s", p.sexo == 1 ? "Hombre" : "Mujer");
+        printf("sexo: %s", p.sexo == HOMBRE ? "Hombre" : "Mujer");
 
         /* fecha de nacimiento */
         printf("nacimiento: %d-%02d-%02d",

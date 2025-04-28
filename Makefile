@@ -18,7 +18,7 @@ includedir = $(prefix)/include
 # configuration
 OBJDIR := build
 OBJS := $(addprefix $(OBJDIR)/,curp.o trie.o)
-CHECK_FLAGS = -pthread -lcheck_pic -lrt -lm -lsubunit
+CHECK_FLAGS = -pthread -lcheck_pic -lrt -lm -lsubunit -ltheft
 
 # targets
 .PHONY: all
@@ -36,6 +36,12 @@ $(OBJDIR)/curp.o: src/curp.c include/curp.h include/trie.h
 $(OBJDIR)/trie.o: src/trie.c include/trie.h
 	$(CC) -c $(CFLAGS) -Iinclude $< -o $@
 
+$(OBJDIR)/check_curp_examples.o: tests/check_curp_examples.c | $(OBJDIR)
+	$(CC) -c $(CFLAGS) -Iinclude $< -o $@
+
+$(OBJDIR)/check_curp_pbt.o: tests/check_curp_pbt.c | $(OBJDIR)
+	$(CC) -c $(CFLAGS) -Iinclude $< -o $@
+
 $(OBJDIR)/check_curp.o: tests/check_curp.c | $(OBJDIR)
 	$(CC) -c $(CFLAGS) -Iinclude $< -o $@
 
@@ -45,7 +51,7 @@ $(OBJDIR):
 	mkdir $(OBJDIR)
 
 .PHONY: tests
-tests: $(OBJDIR)/check_curp.o $(OBJS)
+tests: $(OBJDIR)/check_curp.o $(OBJDIR)/check_curp_examples.o $(OBJDIR)/check_curp_pbt.o $(OBJS)
 	$(CC) $(CFLAGS) $^ -o test $(CHECK_FLAGS)
 
 .PHONY: install

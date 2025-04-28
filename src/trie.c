@@ -25,7 +25,7 @@ struct trie_node *trie_create() {
 	int i;
 
 	/* obtener memoria */
-	t = (struct trie_node *) malloc(sizeof(struct trie_node));
+	t = malloc(sizeof(struct trie_node));
 
 	if (t == NULL) return NULL;
 
