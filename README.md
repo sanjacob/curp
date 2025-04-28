@@ -1,7 +1,7 @@
-# curp.h
+# curp
 
-curp.h es una librería para la validación y extracción de datos de la CURP
-(Clave Única de Registro de Población) Mexicana.
+La primera y única librería de C para la validación y extracción de datos
+de la CURP (Clave Única de Registro de Población) Mexicana.
 
 Esta librería esta optimizada para **velocidad** y **eficiencia**, es
 perfecta para aplicaciones de datos masivos, o plataformas que cuentan
