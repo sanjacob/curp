@@ -20,6 +20,19 @@ jobs:
       - name: Install Check
         run: sudo apt-get install check -y
 
+      - name: Clone Theft
+        uses: actions/checkout@v4
+        with:
+          repository: silentbicycle/theft
+          path: theft
+
+      - name: Install Theft
+        working-directory: ${{github.workspace}}/theft
+        run: |
+          make
+          make test
+          sudo make install
+
       - name: Compile
         run: make
 
@@ -33,6 +46,19 @@ jobs:
 
       - name: Install Check
         run: sudo apt-get install check -y
+
+      - name: Clone Theft
+        uses: actions/checkout@v4
+        with:
+          repository: silentbicycle/theft
+          path: theft
+
+      - name: Install Theft
+        working-directory: ${{github.workspace}}/theft
+        run: |
+          make
+          make test
+          sudo make install
 
       - name: Configure
         run: cmake -B ${{github.workspace}}/build
@@ -51,6 +77,19 @@ jobs:
 
       - name: Install Check
         run: sudo apt-get install check -y
+
+      - name: Clone Theft
+        uses: actions/checkout@v4
+        with:
+          repository: silentbicycle/theft
+          path: theft
+
+      - name: Install Theft
+        working-directory: ${{github.workspace}}/theft
+        run: |
+          make
+          make test
+          sudo make install
 
       - uses: actions/setup-python@v5
         with:
