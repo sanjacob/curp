@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Check
+        run: sudo apt-get install check -y
+
       - name: Compile
         run: make
 
@@ -27,6 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Check
+        run: sudo apt-get install check -y
 
       - name: Configure
         run: cmake -B ${{github.workspace}}/build
@@ -42,6 +48,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Check
+        run: sudo apt-get install check -y
 
       - uses: actions/setup-python@v5
         with:
