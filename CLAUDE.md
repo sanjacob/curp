@@ -47,3 +47,10 @@ not in `.gitignore`, so don't commit it.
 - Every source file starts with the LGPL copyright header — copy it for new files.
 - Keep `README.md`, `doc/*.rst` and `include/curp.h` consistent when changing
   the API or error codes.
+
+## Branches & PRs
+
+- Every PR gets its own branch named `claude/<type>/<short-kebab-name>`, where
+  `<type>` is a conventional type: `fix`, `feat`, `docs`, `chore`, `refactor`,
+  `test`, `ci`, `build`. E.g. `claude/fix/cmake-meson-test-linking`.
+- Branch from the latest `master`; one topic per branch.
