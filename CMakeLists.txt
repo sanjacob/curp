@@ -59,11 +59,14 @@ if (BUILD_TESTS)
     enable_testing()
 
     find_package(PkgConfig REQUIRED)
-    pkg_search_module(Check REQUIRED check)
+    pkg_check_modules(Check REQUIRED IMPORTED_TARGET check)
+    pkg_check_modules(Theft REQUIRED IMPORTED_TARGET libtheft)
 
-    add_executable(test_curp tests/check_curp.c)
-    target_include_directories(test_curp PRIVATE ${Check_INCLUDE_DIRS})
-    target_link_libraries(test_curp curp ${Check_LIBRARIES})
+    add_executable(test_curp
+        tests/check_curp.c
+        tests/check_curp_examples.c
+        tests/check_curp_pbt.c)
+    target_link_libraries(test_curp curp PkgConfig::Check PkgConfig::Theft)
 
     add_test(NAME curp COMMAND test_curp)
 endif()

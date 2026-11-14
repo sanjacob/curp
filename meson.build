@@ -17,11 +17,15 @@ curplib = shared_library('curp',
 
 # tests
 check_dep = dependency('check', required : true)
+theft_dep = dependency('libtheft', required : true)
 
-testexe = executable('testexe', 'tests/check_curp.c',
+test_sources = ['tests/check_curp.c',
+                'tests/check_curp_examples.c',
+                'tests/check_curp_pbt.c']
+testexe = executable('testexe', test_sources,
                      link_with : curplib,
                      include_directories : inc,
-                     dependencies : check_dep)
+                     dependencies : [check_dep, theft_dep])
 
 test('curp test', testexe)
 
