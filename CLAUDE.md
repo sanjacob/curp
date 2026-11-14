@@ -25,18 +25,18 @@ See the table in `README.md`.
 ## Build & test
 
 Dependencies: `gcc`, `make`, `check` (apt), `theft` (built from source, installs
-to `/usr/local`). Meson/CMake optional.
+to `/usr/local`, pkg-config name `libtheft`). Meson/CMake optional.
 
 ```bash
 make          # NOTE: `all` runs `clean` first; produces ./libcurp.so
 make check    # builds ./test and runs all suites (examples + PBT)
+
+cmake -B build && cmake --build build && (cd build && ctest)
+meson setup build && meson compile -C build && meson test -C build
 ```
 
-`make` is the only build that currently passes. **CMake and Meson builds fail
-at link time**: they compile only `tests/check_curp.c` and don't link
-`check_curp_examples.c`, `check_curp_pbt.c` or `theft` (undefined
-`curp_suite` / `theft_suite`). CI (`.github/workflows/build.yml`) runs all
-three, so those jobs fail until fixed.
+CI (`.github/workflows/build.yml`) runs all three builds; when adding a test
+source file, add it to `Makefile`, `CMakeLists.txt` and `meson.build`.
 
 Build outputs (`build/`, `test`, `libcurp.so`) are untracked; `libcurp.so` is
 not in `.gitignore`, so don't commit it.
