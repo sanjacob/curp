@@ -311,6 +311,25 @@ static struct theft_type_info curp_error_consonante_info = {
 	.autoshrink_config = { .enable = 1 }
 };
 
+static enum theft_alloc_res
+curp_error_verificador_alloc_cb(struct theft *t, void *env, void **instance) {
+	char *curp;
+
+	random_curp_alloc_cb(t, env, instance);
+	curp = *instance;
+
+	curp[17] = (char)((curp[17] - '0' + NUMBER(t, 1, 9)) % 10) + '0';
+
+	return THEFT_ALLOC_OK;
+}
+
+static struct theft_type_info curp_error_verificador_info = {
+	.alloc = curp_error_verificador_alloc_cb,
+	.free = theft_generic_free_cb,
+	.print = theft_generic_print_cb,
+	.autoshrink_config = { .enable = 1 }
+};
+
 static enum theft_trial_res
 curp_debe_ser_valida(struct theft *t, void *arg1) {
 	const char *curp = (char *)arg1;
@@ -529,6 +548,33 @@ START_TEST(test_curp_debe_dar_error_consonante)
 }
 END_TEST
 
+static enum theft_trial_res
+curp_debe_dar_error_verificador(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	int r = curp_validar(curp, NULL);
+
+	if (curp_error(r) != ERROR_VERIFICADOR) return THEFT_TRIAL_FAIL;
+	if (CURP_ERROR_POSICION(r) != 18) return THEFT_TRIAL_FAIL;
+	return THEFT_TRIAL_PASS;
+}
+
+START_TEST(test_curp_debe_dar_error_verificador)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_error_verificador,
+		.type_info = { &curp_error_verificador_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
 Suite * theft_suite(void)
 {
 	Suite *suite;
@@ -546,6 +592,7 @@ Suite * theft_suite(void)
 	tcase_add_test(tc_core, test_curp_debe_dar_error_sexo);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_entidad);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_consonante);
+	tcase_add_test(tc_core, test_curp_debe_dar_error_verificador);
 	suite_add_tcase(suite, tc_core);
 
 	return suite;
