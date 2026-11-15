@@ -80,8 +80,8 @@ random_curp_alloc_cb(struct theft *t, void *env, void **instance) {
 
 	/* dia: 01-29 */
 	dia = NUMBER(t, 1, 28);
-	curp[8] = (char)(mes / 10) + '0';
-	curp[9] = (char)(mes % 10) + '0';
+	curp[8] = (char)(dia / 10) + '0';
+	curp[9] = (char)(dia % 10) + '0';
 
 	/* sexo: HMX */
 	sexo = theft_random_choice(t, 3);
