@@ -66,9 +66,8 @@ if (BUILD_TESTS)
         GIT_REPOSITORY https://github.com/silentbicycle/theft.git
         GIT_TAG v0.4.5)
     FetchContent_MakeAvailable(check)
-    FetchContent_MakeAvailable(theft) # sin CMakeLists: solo descarga
+    FetchContent_MakeAvailable(theft)
 
-    # theft usa un Makefile; se compila aquí a partir de sus fuentes
     file(GLOB THEFT_SOURCES ${theft_SOURCE_DIR}/src/*.c)
     add_custom_command(
         OUTPUT ${theft_BINARY_DIR}/bits_lut.h
