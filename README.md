@@ -112,6 +112,11 @@ Los motivos de error se listan debajo de acuerdo a su prioridad.
 En general, los errores que ocurran primero en la CURP toman prioridad sobre
 errores que ocurran después.
 
+La excepción es el día de nacimiento, que se revisa al final, justo antes del
+dígito verificador. Un día inválido (por ejemplo, 31 de junio) solo se reporta
+como `ERROR_FECHA` si el resto de la CURP, sin contar el dígito verificador,
+es correcto.
+
 | Nombre            | Descripción                                    |
 |-------------------|------------------------------------------------|
 | ERROR_FORMATO     | No corresponde a un formato AAAANNNNNNAAAAAAXN |
