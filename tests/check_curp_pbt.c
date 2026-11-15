@@ -793,6 +793,158 @@ START_TEST(test_curp_debe_dar_error_letra)
 }
 END_TEST
 
+static enum theft_trial_res
+curp_debe_dar_anio(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	struct curp p;
+	unsigned int anio;
+
+	if (curp_validar(curp, &p) != CURP_VALIDA) return THEFT_TRIAL_FAIL;
+
+	anio = 1900 + (curp[4] - '0') * 10 + (curp[5] - '0');
+	if (isupper(curp[16])) anio += 100;
+
+	return p.anio_nacimiento == anio ? THEFT_TRIAL_PASS : THEFT_TRIAL_FAIL;
+}
+
+START_TEST(test_curp_debe_dar_anio)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_anio,
+		.type_info = { &random_curp_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
+static enum theft_trial_res
+curp_debe_dar_mes(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	struct curp p;
+	unsigned int mes;
+
+	if (curp_validar(curp, &p) != CURP_VALIDA) return THEFT_TRIAL_FAIL;
+
+	mes = (curp[6] - '0') * 10 + (curp[7] - '0');
+
+	return p.mes_nacimiento == mes ? THEFT_TRIAL_PASS : THEFT_TRIAL_FAIL;
+}
+
+START_TEST(test_curp_debe_dar_mes)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_mes,
+		.type_info = { &random_curp_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
+static enum theft_trial_res
+curp_debe_dar_dia(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	struct curp p;
+	unsigned int dia;
+
+	if (curp_validar(curp, &p) != CURP_VALIDA) return THEFT_TRIAL_FAIL;
+
+	dia = (curp[8] - '0') * 10 + (curp[9] - '0');
+
+	return p.dia_nacimiento == dia ? THEFT_TRIAL_PASS : THEFT_TRIAL_FAIL;
+}
+
+START_TEST(test_curp_debe_dar_dia)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_dia,
+		.type_info = { &random_curp_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
+static enum theft_trial_res
+curp_debe_dar_sexo(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	struct curp p;
+	int sexo;
+
+	if (curp_validar(curp, &p) != CURP_VALIDA) return THEFT_TRIAL_FAIL;
+
+	sexo = curp[10] == 'H' ? HOMBRE : curp[10] == 'M' ? MUJER : 0;
+
+	return (int)p.sexo == sexo ? THEFT_TRIAL_PASS : THEFT_TRIAL_FAIL;
+}
+
+START_TEST(test_curp_debe_dar_sexo)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_sexo,
+		.type_info = { &random_curp_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
+static enum theft_trial_res
+curp_debe_dar_entidad(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	struct curp p;
+	int i;
+
+	if (curp_validar(curp, &p) != CURP_VALIDA) return THEFT_TRIAL_FAIL;
+
+	for (i = 0; entidades[i] != NULL; ++i)
+		if (entidades[i][0] == curp[11] && entidades[i][1] == curp[12]) break;
+
+	return (int)p.entidad_nacimiento == i ? THEFT_TRIAL_PASS : THEFT_TRIAL_FAIL;
+}
+
+START_TEST(test_curp_debe_dar_entidad)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_entidad,
+		.type_info = { &random_curp_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
 Suite * theft_suite(void)
 {
 	Suite *suite;
@@ -803,6 +955,11 @@ Suite * theft_suite(void)
 	tc_core = tcase_create("Core");
 
 	tcase_add_test(tc_core, test_curp_debe_ser_valida);
+	tcase_add_test(tc_core, test_curp_debe_dar_anio);
+	tcase_add_test(tc_core, test_curp_debe_dar_mes);
+	tcase_add_test(tc_core, test_curp_debe_dar_dia);
+	tcase_add_test(tc_core, test_curp_debe_dar_sexo);
+	tcase_add_test(tc_core, test_curp_debe_dar_entidad);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_corta);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_larga);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_digito);
