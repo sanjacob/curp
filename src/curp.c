@@ -179,7 +179,6 @@ int curp_validar(const char *s, struct curp* p)
 		case 1:
 			ok = isvowel(*c) || *c == 'X';
 			if (!ok) break;
-			/* continua con la revision de altisonantes */
 		case 0: case 2: case 3:
 			if (node != NULL) node = TRIE_GET(node, *c);
 			ok = node == NULL || !node->is_eow;
