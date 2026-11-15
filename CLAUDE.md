@@ -24,8 +24,12 @@ See the table in `README.md`.
 
 ## Build & test
 
-Dependencies: `gcc`, `make`, `check` (apt), `theft` (built from source, installs
-to `/usr/local`, pkg-config name `libtheft`). Meson/CMake optional.
+Test dependencies: `check` and `theft`.
+
+- CMake downloads and builds pinned versions itself (FetchContent, see
+  `CMakeLists.txt`); the first configure needs network. Nothing to install.
+- `make` and Meson need them installed: `check` from apt, `theft` built from
+  source (installs to `/usr/local`, pkg-config name `libtheft`).
 
 ```bash
 make          # NOTE: `all` runs `clean` first; produces ./libcurp.so

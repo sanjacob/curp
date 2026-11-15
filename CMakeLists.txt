@@ -58,15 +58,34 @@ if (BUILD_TESTS)
     message("-- Configuring curp tests")
     enable_testing()
 
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(Check REQUIRED IMPORTED_TARGET check)
-    pkg_check_modules(Theft REQUIRED IMPORTED_TARGET libtheft)
+    include(FetchContent)
+    FetchContent_Declare(check
+        GIT_REPOSITORY https://github.com/libcheck/check.git
+        GIT_TAG 0.15.2)
+    FetchContent_Declare(theft
+        GIT_REPOSITORY https://github.com/silentbicycle/theft.git
+        GIT_TAG v0.4.5)
+    FetchContent_MakeAvailable(check)
+    FetchContent_MakeAvailable(theft)
+
+    file(GLOB THEFT_SOURCES ${theft_SOURCE_DIR}/src/*.c)
+    add_custom_command(
+        OUTPUT ${theft_BINARY_DIR}/bits_lut.h
+        COMMAND awk -f ${theft_SOURCE_DIR}/scripts/mk_bits_lut
+                > ${theft_BINARY_DIR}/bits_lut.h)
+    add_library(theft STATIC ${THEFT_SOURCES} ${theft_BINARY_DIR}/bits_lut.h)
+    target_include_directories(theft
+        PUBLIC ${theft_SOURCE_DIR}/inc
+        PRIVATE ${theft_BINARY_DIR})
+    target_compile_definitions(theft PRIVATE _POSIX_C_SOURCE=199309L)
+    set_target_properties(theft PROPERTIES C_STANDARD 99)
+    target_link_libraries(theft PRIVATE m)
 
     add_executable(test_curp
         tests/check_curp.c
         tests/check_curp_examples.c
         tests/check_curp_pbt.c)
-    target_link_libraries(test_curp curp PkgConfig::Check PkgConfig::Theft)
+    target_link_libraries(test_curp curp Check::check theft)
 
     add_test(NAME curp COMMAND test_curp)
 endif()
