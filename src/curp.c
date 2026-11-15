@@ -177,6 +177,7 @@ int curp_validar(const char *s, struct curp* p)
 
 		switch (i) {
 		case 1: ok = (isvowel(*c) || *c == 'X');
+			if (!ok) break;
 		case 0: case 2: case 3:
 			if (node != NULL) node = TRIE_GET(node, *c);
 			ok = node == NULL || !node->is_eow;
