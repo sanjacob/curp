@@ -291,6 +291,21 @@ START_TEST(test_curp_altisonante_2)
 }
 END_TEST
 
+/* ERROR_INICIALIZACION ********************************/
+
+START_TEST(test_curp_sin_inicializar)
+{
+	int code;
+
+	curp_exit();
+	code = curp_validar("SABC560626MDFLRN01", NULL);
+	curp_init();
+
+	ck_assert_int_eq(code, ERROR_INICIALIZACION);
+	ck_assert_int_eq(curp_error(code), ERROR_INICIALIZACION);
+}
+END_TEST
+
 /******************* curp_entidad ************************/
 
 START_TEST(test_curp_entidad_iso)
@@ -389,6 +404,9 @@ Suite * curp_suite(void)
 	/* ALTISONANTE */
 	tcase_add_test(tc_core, test_curp_altisonante_1);
 	tcase_add_test(tc_core, test_curp_altisonante_2);
+
+	/* INICIALIZACION */
+	tcase_add_test(tc_core, test_curp_sin_inicializar);
 	
 	tcase_add_test(tc_core, test_curp_generar);
 

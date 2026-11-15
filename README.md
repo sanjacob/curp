@@ -122,6 +122,9 @@ errores que ocurran después.
 | ERROR_VERIFICADOR | El dígito verificador no es correcto           |
 | **CURP_VALIDA**   | La CURP tiene un formato válido                |
 
+Si no se ha llamado `curp_init()`, `curp_validar` regresa
+`ERROR_INICIALIZACION`.
+
 La posición del error se puede obtener con el macro
 `CURP_ERROR_POSICION(int)`.
 
