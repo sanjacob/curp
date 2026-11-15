@@ -194,7 +194,7 @@ int curp_validar(const char *s, struct curp* p)
 		case 13: case 14: case 15: ok = isconsonant(*c); break;
 		case 16: ok = isasciidigit(*c) || (h = isasciiupper(*c)); break;
 		case 17: ok = isasciidigit(*c); break;
-		default: ok = 0; break;
+		default: return -(1 << 7 | i);
 		}
 
 		if (!ok) break;
@@ -208,7 +208,7 @@ int curp_validar(const char *s, struct curp* p)
 	dim = month == 2 && is_leap ? 29 : days_in_month[month];
 	if (day < 1 || day > dim) return ERROR_FECHA;
 
-	if (sum % 10 != 0) return -(ok << 7 | i);
+	if (sum % 10 != 0) return ERROR_VERIFICADOR;
 
 	/* guardar detalles de la curp */
 	if (p != NULL) {
@@ -230,13 +230,14 @@ enum curp_err curp_error(int code) {
 	pos = -code & 0x1F;
 	ok = -code >> 7;
 
-	if (ok) return pos == 18 ? ERROR_VERIFICADOR : ERROR_FORMATO;
+	if (ok) return ERROR_FORMATO;
 
 	switch(pos) {
 	case 8: return ERROR_FECHA;
 	case 12: return ERROR_ENTIDAD;
 	case 14: case 15: return ERROR_CONSONANTE;
-	case 16: case 18: return ERROR_FORMATO;
+	case 16: return ERROR_FORMATO;
+	case 18: return ERROR_VERIFICADOR;
 	default: return -pos;
 	}
 }

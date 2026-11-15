@@ -117,7 +117,9 @@ START_TEST(test_curp_larga)
 	const int code = curp_validar(curp, NULL);
 
 	ck_assert_int_lt(code, 0);
+	ck_assert_int_ne(code, ERROR_VERIFICADOR);
 	ck_assert_int_eq(curp_error(code), ERROR_FORMATO);
+	ck_assert_int_eq(CURP_ERROR_POSICION(code), 18);
 }
 END_TEST
 
@@ -285,6 +287,7 @@ START_TEST(test_curp_verificador)
 	const int code = curp_validar(curp, NULL);
 
 	ck_assert_int_lt(code, 0);
+	ck_assert_int_eq(code, ERROR_VERIFICADOR);
 	ck_assert_int_eq(curp_error(code), ERROR_VERIFICADOR);
 }
 END_TEST
