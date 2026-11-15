@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <check.h>
 #include <stdio.h>
+#include <locale.h>
 #include "curp.h"
 
 /* CURP test suite */
@@ -351,6 +352,32 @@ START_TEST(test_curp_sin_inicializar)
 }
 END_TEST
 
+/* LOCALE **********************************************/
+
+START_TEST(test_curp_locale_latin1)
+{
+	const char *locales[] = {
+		"es_MX.ISO-8859-1", "es_ES.ISO-8859-1", "en_US.ISO-8859-1", NULL
+	};
+	int i, code;
+
+	for (i = 0; locales[i] != NULL; ++i)
+		if (setlocale(LC_CTYPE, locales[i]) != NULL) break;
+
+	/*                   v                */
+	code = curp_validar("S\xc1" "BC560626MDFLRN01", NULL);
+	ck_assert_int_eq(curp_error(code), ERROR_FORMATO);
+	ck_assert_int_eq(CURP_ERROR_POSICION(code), 1);
+
+	/*                                  v */
+	code = curp_validar("SABC560626MDFLRN\xc1" "1", NULL);
+	ck_assert_int_eq(curp_error(code), ERROR_FORMATO);
+	ck_assert_int_eq(CURP_ERROR_POSICION(code), 16);
+
+	setlocale(LC_CTYPE, "C");
+}
+END_TEST
+
 /******************* curp_entidad ************************/
 
 START_TEST(test_curp_entidad_iso)
@@ -455,6 +482,9 @@ Suite * curp_suite(void)
 	/* ALTISONANTE */
 	tcase_add_test(tc_core, test_curp_altisonante_1);
 	tcase_add_test(tc_core, test_curp_altisonante_2);
+
+	/* LOCALE */
+	tcase_add_test(tc_core, test_curp_locale_latin1);
 
 	/* INICIALIZACION */
 	tcase_add_test(tc_core, test_curp_sin_inicializar);

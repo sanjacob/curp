@@ -18,6 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Generate Latin-1 locale
+        run: sudo localedef -i es_MX -f ISO-8859-1 es_MX.ISO-8859-1
+
       - name: Install Check
         run: sudo apt-get install check -y
 
@@ -44,6 +47,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Generate Latin-1 locale
+        run: sudo localedef -i es_MX -f ISO-8859-1 es_MX.ISO-8859-1
+
       - name: Configure
         run: cmake -B ${{github.workspace}}/build
 
@@ -58,6 +64,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Generate Latin-1 locale
+        run: sudo localedef -i es_MX -f ISO-8859-1 es_MX.ISO-8859-1
 
       - name: Install Check
         run: sudo apt-get install check -y
