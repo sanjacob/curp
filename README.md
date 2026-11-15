@@ -115,10 +115,12 @@ errores que ocurran después.
 | Nombre            | Descripción                                    |
 |-------------------|------------------------------------------------|
 | ERROR_FORMATO     | No corresponde a un formato AAAANNNNNNAAAAAAXN |
+| ERROR_VOCAL       | El segundo carácter no es vocal ni X           |
 | ERROR_ALTISONANTE | Contiene una palabra altisonante               |
 | ERROR_FECHA       | La fecha de nacimiento no es válida            |
 | ERROR_SEXO        | El sexo no es válido                           |
 | ERROR_ENTIDAD     | La entidad de nacimiento no es válida          |
+| ERROR_CONSONANTE  | Las consonantes internas no son válidas        |
 | ERROR_VERIFICADOR | El dígito verificador no es correcto           |
 | **CURP_VALIDA**   | La CURP tiene un formato válido                |
 
