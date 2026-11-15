@@ -88,7 +88,7 @@ random_curp_alloc_cb(struct theft *t, void *env, void **instance) {
 	curp[10] = sexo == 1 ? 'H' : sexo == 2 ? 'M' : 'X';
 
 	/* entidad de nacimiento */
-	entidad = entidades[NUMBER(t, 1, 32)];
+	entidad = entidades[NUMBER(t, 0, 32)];
 	curp[11] = entidad[0]; 
 	curp[12] = entidad[1];
 
