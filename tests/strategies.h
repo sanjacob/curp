@@ -7,6 +7,11 @@ static const char consonants[] = {
 	'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'
 };
 
+static const char consonants_no_x[] = {
+	'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N',
+	'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'Z'
+};
+
 #define CHARACTER(t, min, max) (char)(theft_random_choice(t, (max) - (min) + 1) + (min))
 #define NUMBER(t, min, max) (theft_random_choice(t, (max) - (min) + 1) + (min))
 #define BOOLEAN(t) theft_random_choice(t, 2)
