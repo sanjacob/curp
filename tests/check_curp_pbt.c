@@ -80,15 +80,15 @@ random_curp_alloc_cb(struct theft *t, void *env, void **instance) {
 
 	/* dia: 01-29 */
 	dia = NUMBER(t, 1, 28);
-	curp[8] = (char)(mes / 10) + '0';
-	curp[9] = (char)(mes % 10) + '0';
+	curp[8] = (char)(dia / 10) + '0';
+	curp[9] = (char)(dia % 10) + '0';
 
 	/* sexo: HMX */
 	sexo = theft_random_choice(t, 3);
 	curp[10] = sexo == 1 ? 'H' : sexo == 2 ? 'M' : 'X';
 
 	/* entidad de nacimiento */
-	entidad = entidades[NUMBER(t, 1, 32)];
+	entidad = entidades[NUMBER(t, 0, 32)];
 	curp[11] = entidad[0]; 
 	curp[12] = entidad[1];
 
