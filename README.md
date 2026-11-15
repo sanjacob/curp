@@ -30,7 +30,7 @@ casos específicos que muchas otras librerías no cubren.
 int main(int argc, char* argv[])
 {
     /* Es necesario inicializar la librería */
-    if (!curp_init()) {
+    if (curp_init() < 0) {
         printf("no se pudo inicializar curp.h");
         return 1;
     }
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     struct curp p;
 
     /* Es necesario inicializar la librería */
-    if (!curp_init()) {
+    if (curp_init() < 0) {
         printf("no se pudo inicializar curp.h");
         return 1;
     }
