@@ -46,6 +46,22 @@ static int calcular_verificador(const char* curp) {
 	return sum == 0 ? 0 : 10 - sum;
 }
 
+static int isstate(char a, char b) {
+	int i;
+
+	for (i = 0; entidades[i] != NULL; ++i)
+		if (entidades[i][0] == a && entidades[i][1] == b) return 1;
+	return 0;
+}
+
+static int isstateprefix(char a) {
+	int i;
+
+	for (i = 0; entidades[i] != NULL; ++i)
+		if (entidades[i][0] == a) return 1;
+	return 0;
+}
+
 static enum theft_alloc_res
 random_curp_alloc_cb(struct theft *t, void *env, void **instance) {
 	/* Dynamically allocate string */
@@ -244,6 +260,31 @@ static struct theft_type_info curp_error_sexo_info = {
 	.autoshrink_config = { .enable = 1 }
 };
 
+static enum theft_alloc_res
+curp_error_entidad_alloc_cb(struct theft *t, void *env, void **instance) {
+	char *curp;
+
+	random_curp_alloc_cb(t, env, instance);
+	curp = *instance;
+
+	do {
+		curp[11] = UPPER_CHARACTER(t);
+		curp[12] = UPPER_CHARACTER(t);
+	} while (isstate(curp[11], curp[12]));
+
+	curp[17] = '0';
+	curp[17] = (char)(calcular_verificador(curp) + '0');
+
+	return THEFT_ALLOC_OK;
+}
+
+static struct theft_type_info curp_error_entidad_info = {
+	.alloc = curp_error_entidad_alloc_cb,
+	.free = theft_generic_free_cb,
+	.print = theft_generic_print_cb,
+	.autoshrink_config = { .enable = 1 }
+};
+
 static enum theft_trial_res
 curp_debe_ser_valida(struct theft *t, void *arg1) {
 	const char *curp = (char *)arg1;
@@ -404,6 +445,34 @@ START_TEST(test_curp_debe_dar_error_sexo)
 }
 END_TEST
 
+static enum theft_trial_res
+curp_debe_dar_error_entidad(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	int r = curp_validar(curp, NULL);
+	int pos = isstateprefix(curp[11]) ? 12 : 11;
+
+	if (curp_error(r) != ERROR_ENTIDAD) return THEFT_TRIAL_FAIL;
+	if (CURP_ERROR_POSICION(r) != pos) return THEFT_TRIAL_FAIL;
+	return THEFT_TRIAL_PASS;
+}
+
+START_TEST(test_curp_debe_dar_error_entidad)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_error_entidad,
+		.type_info = { &curp_error_entidad_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
 Suite * theft_suite(void)
 {
 	Suite *suite;
@@ -419,6 +488,7 @@ Suite * theft_suite(void)
 	tcase_add_test(tc_core, test_curp_debe_dar_error_mes);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_dia);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_sexo);
+	tcase_add_test(tc_core, test_curp_debe_dar_error_entidad);
 	suite_add_tcase(suite, tc_core);
 
 	return suite;
