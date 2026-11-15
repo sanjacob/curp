@@ -267,6 +267,29 @@ START_TEST(test_curp_verificador)
 END_TEST
 
 
+/* ERROR_VOCAL *****************************************/
+
+START_TEST(test_curp_vocal)
+{
+	/*                   v                */
+	const char *curp = "SBBC560626MDFLRN04";
+	const int code = curp_validar(curp, NULL);
+
+	ck_assert_int_lt(code, 0);
+	ck_assert_int_eq(curp_error(code), ERROR_VOCAL);
+	ck_assert_int_eq(CURP_ERROR_POSICION(code), 1);
+}
+END_TEST
+
+START_TEST(test_curp_vocal_x)
+{
+	/*                   v                */
+	const char *curp = "SXBC560626MDFLRN03";
+	ck_assert_int_eq(curp_validar(curp, NULL), CURP_VALIDA);
+}
+END_TEST
+
+
 /* ERROR_ALTISONANTE ***********************************/
 
 START_TEST(test_curp_altisonante_1)
@@ -400,6 +423,10 @@ Suite * curp_suite(void)
 	tcase_add_test(tc_core, test_curp_entidad);
 	tcase_add_test(tc_core, test_curp_entidad_2);
 	tcase_add_test(tc_core, test_curp_verificador);
+
+	/* VOCAL */
+	tcase_add_test(tc_core, test_curp_vocal);
+	tcase_add_test(tc_core, test_curp_vocal_x);
 
 	/* ALTISONANTE */
 	tcase_add_test(tc_core, test_curp_altisonante_1);
