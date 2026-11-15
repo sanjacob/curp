@@ -140,7 +140,7 @@ int curp_cargar(const char *s, struct curp* p)
 			if (node != NULL) node = TRIE_GET(node, *c);
 			break;
 		case 16:
-			p->anio_nacimiento += 1900 + (isupper(*c) * 100);
+			p->anio_nacimiento += 1900 + ((isupper(*c) != 0) * 100);
 			break;
 		default:
 			break;
@@ -190,7 +190,7 @@ int curp_validar(const char *s, struct curp* p)
 		case 11: node = entidades_trie;
 		case 12: node = TRIE_GET(node, *c); ok = node != NULL; break;
 		case 13: case 14: case 15: ok = isconsonant(*c); break;
-		case 16: ok = isdigit(*c) || (h = isupper(*c)); break;
+		case 16: ok = isdigit(*c) || (h = isupper(*c) != 0); break;
 		case 17: ok = isdigit(*c); break;
 		default: ok = 0; break;
 		}

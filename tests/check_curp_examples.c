@@ -38,6 +38,17 @@ START_TEST(test_curp_cargar)
 }
 END_TEST
 
+START_TEST(test_curp_cargar_2000)
+{
+	/*                                 v  */
+	const char *curp = "SABC560626MDFLRNA1";
+	struct curp p;
+
+	curp_cargar(curp, &p);
+	ck_assert_int_eq(p.anio_nacimiento, 2056);
+}
+END_TEST
+
 START_TEST(test_curp_cargar_error)
 {
 	const char *curp = "SABC560626";
@@ -72,6 +83,17 @@ START_TEST(test_curp_valida_propiedades)
 	ck_assert_int_eq(p.mes_nacimiento, 6);
 	ck_assert_int_eq(p.dia_nacimiento, 26);
 	ck_assert_int_eq(p.sexo, 2);
+}
+END_TEST
+
+START_TEST(test_curp_valida_propiedades_2000)
+{
+	/*                                 v  */
+	const char *curp = "SABC560626MDFLRNA1";
+	struct curp p;
+
+	ck_assert_int_eq(curp_validar(curp, &p), CURP_VALIDA);
+	ck_assert_int_eq(p.anio_nacimiento, 2056);
 }
 END_TEST
 
@@ -397,11 +419,13 @@ Suite * curp_suite(void)
 	tc_entidad = tcase_create("Entidad");
 
 	tcase_add_test(tc_core, test_curp_cargar);
+	tcase_add_test(tc_core, test_curp_cargar_2000);
 	tcase_add_test(tc_core, test_curp_cargar_error);
 
 	/* VALIDA */
 	tcase_add_test(tc_core, test_curp_valida);
 	tcase_add_test(tc_core, test_curp_valida_propiedades);
+	tcase_add_test(tc_core, test_curp_valida_propiedades_2000);
 
 	/* FORMATO */
 	tcase_add_test(tc_formato, test_curp_corta);
