@@ -138,6 +138,7 @@ enum curp_err {
 	ERROR_CONSONANTE = -13,
 	ERROR_VERIFICADOR = -18,
 	ERROR_FORMATO = -20,
+	ERROR_INICIALIZACION = -21,
 };
 
 #define CURP_ERROR_POSICION(code) (-code & 0x1F)

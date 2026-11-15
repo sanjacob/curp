@@ -161,6 +161,8 @@ int curp_validar(const char *s, struct curp* p)
 	unsigned int h, year, month, day, dim, is_leap;
 	unsigned char sexo;
 
+	if (entidades_trie == NULL || altisonantes_trie == NULL)
+		return ERROR_INICIALIZACION;
 	if (s == NULL) return ERROR_FORMATO;
 
 	node = altisonantes_trie;
