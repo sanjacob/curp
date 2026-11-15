@@ -46,6 +46,10 @@ static int calcular_verificador(const char* curp) {
 	return sum == 0 ? 0 : 10 - sum;
 }
 
+static int isvowel(char c) {
+	return c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
+}
+
 static int isstate(char a, char b) {
 	int i;
 
@@ -285,6 +289,28 @@ static struct theft_type_info curp_error_entidad_info = {
 	.autoshrink_config = { .enable = 1 }
 };
 
+static enum theft_alloc_res
+curp_error_consonante_alloc_cb(struct theft *t, void *env, void **instance) {
+	char *curp;
+
+	random_curp_alloc_cb(t, env, instance);
+	curp = *instance;
+
+	curp[NUMBER(t, 13, 15)] = VOWEL(t);
+
+	curp[17] = '0';
+	curp[17] = (char)(calcular_verificador(curp) + '0');
+
+	return THEFT_ALLOC_OK;
+}
+
+static struct theft_type_info curp_error_consonante_info = {
+	.alloc = curp_error_consonante_alloc_cb,
+	.free = theft_generic_free_cb,
+	.print = theft_generic_print_cb,
+	.autoshrink_config = { .enable = 1 }
+};
+
 static enum theft_trial_res
 curp_debe_ser_valida(struct theft *t, void *arg1) {
 	const char *curp = (char *)arg1;
@@ -473,6 +499,36 @@ START_TEST(test_curp_debe_dar_error_entidad)
 }
 END_TEST
 
+static enum theft_trial_res
+curp_debe_dar_error_consonante(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	int r = curp_validar(curp, NULL);
+	int pos;
+
+	for (pos = 13; !isvowel(curp[pos]); ++pos);
+
+	if (curp_error(r) != ERROR_CONSONANTE) return THEFT_TRIAL_FAIL;
+	if (CURP_ERROR_POSICION(r) != pos) return THEFT_TRIAL_FAIL;
+	return THEFT_TRIAL_PASS;
+}
+
+START_TEST(test_curp_debe_dar_error_consonante)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_error_consonante,
+		.type_info = { &curp_error_consonante_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
 Suite * theft_suite(void)
 {
 	Suite *suite;
@@ -489,6 +545,7 @@ Suite * theft_suite(void)
 	tcase_add_test(tc_core, test_curp_debe_dar_error_dia);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_sexo);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_entidad);
+	tcase_add_test(tc_core, test_curp_debe_dar_error_consonante);
 	suite_add_tcase(suite, tc_core);
 
 	return suite;
