@@ -63,6 +63,8 @@ static const unsigned int days_in_month[] = {
 
 #define isvowel(c) vowels[c - 'A']
 #define isconsonant(c) !vowels[c - 'A']
+#define isasciiupper(c) ((c) >= 'A' && (c) <= 'Z')
+#define isasciidigit(c) ((c) >= '0' && (c) <= '9')
 
 
 void curp_exit(void)
@@ -172,8 +174,8 @@ int curp_validar(const char *s, struct curp* p)
        S A B C | 5 6 0 6 2 6 | M | D F | L R N | 0 9 */
 	for (c = s, i = sum = 0, ok = 1; *c != '\0'; ++i, ++c) {
 		/* verificar formato */
-		if (uppers[i] && !isupper(*c)) break;
-		else if (digits[i] && !isdigit(*c)) break;
+		if (uppers[i] && !isasciiupper(*c)) break;
+		else if (digits[i] && !isasciidigit(*c)) break;
 
 		switch (i) {
 		case 1: ok = (isvowel(*c) || *c == 'X');
@@ -190,8 +192,8 @@ int curp_validar(const char *s, struct curp* p)
 		case 11: node = entidades_trie;
 		case 12: node = TRIE_GET(node, *c); ok = node != NULL; break;
 		case 13: case 14: case 15: ok = isconsonant(*c); break;
-		case 16: ok = isdigit(*c) || (h = isupper(*c) != 0); break;
-		case 17: ok = isdigit(*c); break;
+		case 16: ok = isasciidigit(*c) || (h = isasciiupper(*c)); break;
+		case 17: ok = isasciidigit(*c); break;
 		default: ok = 0; break;
 		}
 
