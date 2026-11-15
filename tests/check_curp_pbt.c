@@ -434,6 +434,32 @@ static struct theft_type_info curp_error_letra_info = {
 	.autoshrink_config = { .enable = 1 }
 };
 
+static int isinrange(char c) {
+	return (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+}
+
+static enum theft_alloc_res
+curp_error_simbolo_alloc_cb(struct theft *t, void *env, void **instance) {
+	char *curp;
+	int pos;
+
+	random_curp_alloc_cb(t, env, instance);
+	curp = *instance;
+
+	pos = NUMBER(t, 0, CURP_LENGTH - 1);
+	do curp[pos] = (char)NUMBER(t, 1, 255);
+	while (isinrange(curp[pos]));
+
+	return THEFT_ALLOC_OK;
+}
+
+static struct theft_type_info curp_error_simbolo_info = {
+	.alloc = curp_error_simbolo_alloc_cb,
+	.free = theft_generic_free_cb,
+	.print = theft_generic_print_cb,
+	.autoshrink_config = { .enable = 1 }
+};
+
 static enum theft_trial_res
 curp_debe_ser_valida(struct theft *t, void *arg1) {
 	const char *curp = (char *)arg1;
@@ -793,6 +819,36 @@ START_TEST(test_curp_debe_dar_error_letra)
 }
 END_TEST
 
+static enum theft_trial_res
+curp_debe_dar_error_simbolo(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	int r = curp_validar(curp, NULL);
+	int pos;
+
+	for (pos = 0; isinrange(curp[pos]); ++pos);
+
+	if (curp_error(r) != ERROR_FORMATO) return THEFT_TRIAL_FAIL;
+	if (CURP_ERROR_POSICION(r) != pos) return THEFT_TRIAL_FAIL;
+	return THEFT_TRIAL_PASS;
+}
+
+START_TEST(test_curp_debe_dar_error_simbolo)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_error_simbolo,
+		.type_info = { &curp_error_simbolo_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
 Suite * theft_suite(void)
 {
 	Suite *suite;
@@ -807,6 +863,7 @@ Suite * theft_suite(void)
 	tcase_add_test(tc_core, test_curp_debe_dar_error_larga);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_digito);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_letra);
+	tcase_add_test(tc_core, test_curp_debe_dar_error_simbolo);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_vocal);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_altisonante);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_mes);
