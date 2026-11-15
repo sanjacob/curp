@@ -404,6 +404,36 @@ static struct theft_type_info curp_error_digito_info = {
 	.autoshrink_config = { .enable = 1 }
 };
 
+static const int posiciones_digito[] = {
+	4, 5, 6, 7, 8, 9, 17
+};
+
+static enum theft_alloc_res
+curp_error_letra_alloc_cb(struct theft *t, void *env, void **instance) {
+	char *curp;
+	int pos;
+
+	random_curp_alloc_cb(t, env, instance);
+	curp = *instance;
+
+	pos = posiciones_digito[NUMBER(t, 0, 6)];
+	curp[pos] = UPPER_CHARACTER(t);
+
+	if (pos != 17) {
+		curp[17] = '0';
+		curp[17] = (char)(calcular_verificador(curp) + '0');
+	}
+
+	return THEFT_ALLOC_OK;
+}
+
+static struct theft_type_info curp_error_letra_info = {
+	.alloc = curp_error_letra_alloc_cb,
+	.free = theft_generic_free_cb,
+	.print = theft_generic_print_cb,
+	.autoshrink_config = { .enable = 1 }
+};
+
 static enum theft_trial_res
 curp_debe_ser_valida(struct theft *t, void *arg1) {
 	const char *curp = (char *)arg1;
@@ -733,6 +763,36 @@ START_TEST(test_curp_debe_dar_error_digito)
 }
 END_TEST
 
+static enum theft_trial_res
+curp_debe_dar_error_letra(struct theft *t, void *arg1) {
+	const char *curp = (char *)arg1;
+	int r = curp_validar(curp, NULL);
+	int i;
+
+	for (i = 0; isdigit(curp[posiciones_digito[i]]); ++i);
+
+	if (curp_error(r) != ERROR_FORMATO) return THEFT_TRIAL_FAIL;
+	if (CURP_ERROR_POSICION(r) != posiciones_digito[i]) return THEFT_TRIAL_FAIL;
+	return THEFT_TRIAL_PASS;
+}
+
+START_TEST(test_curp_debe_dar_error_letra)
+{
+	theft_seed seed = theft_seed_of_time();
+
+	struct theft_run_config config = {
+		.name = __func__,
+		.prop1 = curp_debe_dar_error_letra,
+		.type_info = { &curp_error_letra_info },
+		.seed = seed,
+		.trials = 1000000
+	};
+
+	enum theft_run_res res = theft_run(&config);
+	ck_assert(res == THEFT_RUN_PASS);
+}
+END_TEST
+
 Suite * theft_suite(void)
 {
 	Suite *suite;
@@ -746,6 +806,7 @@ Suite * theft_suite(void)
 	tcase_add_test(tc_core, test_curp_debe_dar_error_corta);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_larga);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_digito);
+	tcase_add_test(tc_core, test_curp_debe_dar_error_letra);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_vocal);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_altisonante);
 	tcase_add_test(tc_core, test_curp_debe_dar_error_mes);
